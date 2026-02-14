@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Project specific
+downloads/
+downloads_twilio/
+agent.log
+mock_test.py
+poll_messages.py
+
+# Sensitive info
+credentials.py
