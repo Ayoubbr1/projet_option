@@ -8,8 +8,8 @@ from twilio.rest import Client
 app = Flask(__name__)
 
 # Twilio Credentials
-ACCOUNT_SID = 'AC6c134af12088bf71545f584557ef08c4'
-AUTH_TOKEN = '2dc3437d2b08541904d8ee54a608781c'
+ACCOUNT_SID = 'ACa37e51f9eeb94675de43390e88909682'
+AUTH_TOKEN = '13bc2c7630cbfe672639d34626036da5'
 
 # Initialize Twilio Client
 client = Client(ACCOUNT_SID, AUTH_TOKEN)
@@ -127,7 +127,7 @@ def send_invite():
     """Endpoint to trigger an 'upload your cv' invite message."""
     target_number = request.args.get('to')
     if not target_number:
-        return jsonify({"error": "Missing 'to' parameter (e.g. ?to=33756941611)"}), 400
+        return jsonify({"error": "Missing 'to' parameter (e.g. ?to=33744119134)"}), 400
     
     # Ensure whatsapp: prefix
     if not target_number.startswith('whatsapp:'):
@@ -150,7 +150,7 @@ def send_invite():
 @app.route('/template', methods=['GET'])
 def send_template():
     """Endpoint to send a Twilio content template."""
-    target_number = request.args.get('to', '33756941611')
+    target_number = request.args.get('to', '33744119134')
     content_sid = request.args.get('sid', 'HXb5b62575e6e4ff6129ad7c8efe1f983e')
     # Default variables from user's sample
     content_vars = request.args.get('vars', '{"1":"12/1","2":"3pm"}')
@@ -178,7 +178,7 @@ if __name__ == "__main__":
 
     # Send startup message to user
     try:
-        user_number = 'whatsapp:+33756941611'
+        user_number = 'whatsapp:+33744119134'
         print(f"Sending startup notification to {user_number}...")
         client.messages.create(
             from_=TWILIO_NUMBER,
