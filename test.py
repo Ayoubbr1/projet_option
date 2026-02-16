@@ -7,13 +7,13 @@ from twilio.rest import Client
 
 app = Flask(__name__)
 
-# Twilio Credentials (set these in Railway environment variables)
-ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', 'ACa37e51f9eeb94675de43390e88909682')
-AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', 'aff37efbcf029585a5802a0cae0a2c2c')
+# Twilio Credentials
+ACCOUNT_SID = 'AC6c134af12088bf71545f584557ef08c4'
+AUTH_TOKEN = '2dc3437d2b08541904d8ee54a608781c'
 
 # Initialize Twilio Client
 client = Client(ACCOUNT_SID, AUTH_TOKEN)
-TWILIO_NUMBER = os.environ.get('TWILIO_NUMBER', 'whatsapp:+14155238886')
+TWILIO_NUMBER = 'whatsapp:+14155238886'
 
 DOWNLOAD_DIR = "downloads_twilio"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -72,14 +72,11 @@ def bot():
         resp.message("I'm ready to receive your file! Please send me your CV/resume now.")
         return str(resp)
 
-    response_message = None
-
     # Process media
     if num_media > 0:
         for i in range(num_media):
             media_url = request.values.get(f'MediaUrl{i}')
             content_type = request.values.get(f'MediaContentType{i}')
-            print(f"Media {i}: url={media_url}, content_type={content_type}")
 
             if media_url:
                 print(f"Downloading media: {media_url}")
@@ -89,35 +86,37 @@ def bot():
 
                 try:
                     # Twilio requires Basic Auth (Account SID + Auth Token) for media
-                    dl_response = requests.get(media_url, auth=(ACCOUNT_SID, AUTH_TOKEN), stream=True)
-                    if dl_response.status_code == 200:
+                    response = requests.get(media_url, auth=(ACCOUNT_SID, AUTH_TOKEN), stream=True)
+                    if response.status_code == 200:
                         with open(filepath, 'wb') as f:
-                            for chunk in dl_response.iter_content(chunk_size=8192):
+                            for chunk in response.iter_content(chunk_size=8192):
                                 f.write(chunk)
-                        print(f"[SUCCESS] Saved: {filepath} (size: {os.path.getsize(filepath)} bytes)")
-
+                        print(f"[SUCCESS] Saved: {filepath}")
+                        
                         # Upload the file to the external API
                         upload_result = upload_file_to_api(filepath, sender)
                         print(f"Upload result: {upload_result}")
-
+                        
                         # Prepare response based on upload result
                         if "error" not in upload_result:
                             response_message = "File received and uploaded to database successfully!"
                         else:
                             response_message = f"File received but upload failed: {upload_result.get('error', 'Unknown error')}"
                     else:
-                        print(f"[ERROR] Failed to download: {dl_response.status_code} {dl_response.text}")
-                        response_message = "Sorry, I couldn't download your file. Please try again."
+                        print(f"[ERROR] Failed to download: {response.status_code}")
                 except Exception as e:
-                    print(f"[ERROR] Error downloading: {e}")
-                    response_message = "Sorry, an error occurred while processing your file. Please try again."
+                    print(f"Error downloading: {e}")
     else:
         print(f"Message body: {request.values.get('Body')}")
 
     resp = MessagingResponse()
     
     if num_media > 0:
-        resp.message(response_message or "File received and uploaded to database!")
+        # Use the response message prepared after file upload
+        if 'response_message' in locals():
+            resp.message(response_message)
+        else:
+            resp.message("File received and uploaded to database!")
     else:
         resp.message("Message received! Send me a file or type 'send file' to upload your CV/resume.")
         
@@ -128,7 +127,7 @@ def send_invite():
     """Endpoint to trigger an 'upload your cv' invite message."""
     target_number = request.args.get('to')
     if not target_number:
-        return jsonify({"error": "Missing 'to' parameter (e.g. ?to=33744119134)"}), 400
+        return jsonify({"error": "Missing 'to' parameter (e.g. ?to=33756941611)"}), 400
     
     # Ensure whatsapp: prefix
     if not target_number.startswith('whatsapp:'):
@@ -151,7 +150,7 @@ def send_invite():
 @app.route('/template', methods=['GET'])
 def send_template():
     """Endpoint to send a Twilio content template."""
-    target_number = request.args.get('to', '33744119134')
+    target_number = request.args.get('to', '33756941611')
     content_sid = request.args.get('sid', 'HXb5b62575e6e4ff6129ad7c8efe1f983e')
     # Default variables from user's sample
     content_vars = request.args.get('vars', '{"1":"12/1","2":"3pm"}')
@@ -179,9 +178,7 @@ if __name__ == "__main__":
 
     # Send startup message to user
     try:
-        user_number = os.environ.get('NOTIFY_NUMBER', 'whatsapp:+33744119134')
-        if not user_number.startswith('whatsapp:'):
-            user_number = f'whatsapp:+{user_number.lstrip("+")}'
+        user_number = 'whatsapp:+33756941611'
         print(f"Sending startup notification to {user_number}...")
         client.messages.create(
             from_=TWILIO_NUMBER,
@@ -192,8 +189,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"[WARNING] Could not send startup message: {e}")
 
-    # Railway provides PORT env var; bind to 0.0.0.0 for external access
-    port = int(os.environ.get('PORT', 5000))
-    print(f"Starting server on port {port}")
-    print("Configure Twilio Sandbox Webhook to: <your-railway-url>/twilio_webhook")
-    app.run(host='0.0.0.0', port=port, debug=False)
+    print("1. Run 'ngrok http 5000'")
+    print("2. Configure Twilio Sandbox Webhook to: <your-ngrok-url>/twilio_webhook")
+    app.run(port=5000, debug=True)
