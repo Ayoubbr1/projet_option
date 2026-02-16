@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+myenv/
+.env
+
+# Project specific
+downloads/
+downloads_twilio/
+agent.log
+
+# Sensitive info
+credentials.py

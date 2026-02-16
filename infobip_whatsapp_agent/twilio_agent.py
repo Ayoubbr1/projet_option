@@ -8,12 +8,12 @@ from twilio.rest import Client
 app = Flask(__name__)
 
 # Twilio Credentials (set these in Railway environment variables)
-ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', 'ACa37e51f9eeb94675de43390e88909682')
-AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', 'aff37efbcf029585a5802a0cae0a2c2c')
+ACCOUNT_SID = os.environ['TWILIO_ACCOUNT_SID']
+AUTH_TOKEN = os.environ['TWILIO_AUTH_TOKEN']
 
 # Initialize Twilio Client
 client = Client(ACCOUNT_SID, AUTH_TOKEN)
-TWILIO_NUMBER = os.environ.get('TWILIO_NUMBER', 'whatsapp:+14155238886')
+TWILIO_NUMBER = os.environ['TWILIO_NUMBER']
 
 DOWNLOAD_DIR = "downloads_twilio"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
